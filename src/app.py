@@ -1,21 +1,14 @@
 from flask import Flask
-from werkzeug.exceptions import HTTPException
 
-from urls import load_urls
-from settings import Settings, load_settings
-from error_handling import handle_exception
+from dependencies import db, migrate
+from modules.users.urls import users_blueprint
 
 app = Flask(__name__)
-
-# Load urls
-load_urls(app)
-
-# Load settings
-settings = Settings()
-app.config.update(load_settings(settings))
-
-# Custom error handling
-app.errorhandler(HTTPException)(handle_exception)
+app.config.from_object('settings.Settings')
+db.init_app(app)
+migrate.init_app(app, db)
+app.app_context().push()
+app.register_blueprint(users_blueprint)
 
 if __name__ == '__main__':
     app.run()
